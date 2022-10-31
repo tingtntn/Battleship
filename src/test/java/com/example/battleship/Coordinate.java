@@ -3,8 +3,8 @@ package com.example.battleship;
 import java.util.Objects;
 
 public class Coordinate {
-    int row;
-    int col;
+    private int row;
+    private int col;
 
     public Coordinate(int row, int col) {
         this.row = row;
@@ -28,5 +28,21 @@ public class Coordinate {
     @Override
     public int hashCode() {
         return Objects.hash(row, col);
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
     }
 }

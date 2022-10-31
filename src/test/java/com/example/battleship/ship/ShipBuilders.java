@@ -10,15 +10,15 @@ public class ShipBuilders {
         return new BattleshipBuilder();
     }
 
-    public static CarrierBuilder newCarrierBuilder() {
+    public static CarrierBuilder newCarrier() {
         return new CarrierBuilder();
     }
 
-    public static SubmarineBuilder newSubmarineBuilder() {
+    public static SubmarineBuilder newSubmarine() {
         return new SubmarineBuilder();
     }
 
-    public static DestroyerBuilder newDestroyerBuilder() {
+    public static DestroyerBuilder newDestroyer() {
         return new DestroyerBuilder();
     }
 
@@ -54,10 +54,11 @@ public class ShipBuilders {
             TTarget extends Ship> implements ShipBuilder<SELF, TTarget> {
 
         private int length;
-        private String type;
-        private String player;
+        private ShipType type;
+        private char player;
         private List<Coordinate> positions;
         private Map<Coordinate, Boolean> coordinateToStatus;
+        private int lives;
 
         @Override
         public SELF setLength(int length) {
@@ -71,24 +72,24 @@ public class ShipBuilders {
         }
 
         @Override
-        public SELF setType(String type) {
+        public SELF setType(ShipType type) {
             this.type = type;
             return self();
         }
 
         @Override
-        public String getType() {
+        public ShipType getType() {
             return this.type;
         }
 
         @Override
-        public SELF setPlayer(String player) {
+        public SELF setPlayer(char player) {
             this.player = player;
             return self();
         }
 
         @Override
-        public String getPlayer() {
+        public char getPlayer() {
             return this.player;
         }
 
@@ -101,6 +102,17 @@ public class ShipBuilders {
         @Override
         public List<Coordinate> getPositions() {
             return this.positions;
+        }
+
+        @Override
+        public SELF setLives(int lives) {
+            this.lives = lives;
+            return self();
+        }
+
+        @Override
+        public int getLives() {
+            return this.lives;
         }
 
         @Override

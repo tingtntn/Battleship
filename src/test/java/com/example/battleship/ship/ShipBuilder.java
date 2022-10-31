@@ -11,11 +11,14 @@ public interface ShipBuilder<SELF extends ShipBuilder<SELF, TTarget>,
     SELF setLength(int length);
     int getLength();
 
-    SELF setType(String type);
-    String getType();
+    SELF setType(ShipType type);
+    ShipType getType();
 
-    SELF setPlayer(String player);
-    String getPlayer();
+    SELF setPlayer(char player);
+    char getPlayer();
+
+    SELF setLives(int lives);
+    int getLives();
 
     SELF setPositions(List<Coordinate> positions);
     List<Coordinate> getPositions();

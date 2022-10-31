@@ -7,31 +7,133 @@ import java.util.*;
 public class BattleshipClient {
     Map<Coordinate, Ship> coordinateToShip = new HashMap<>();
     char[][] board = new char[10][10];
+    boolean isGameOver = false;
 
     public static void main(String args[]) {
         BattleshipClient client = new BattleshipClient();
         client.printGameOpening();
         client.startGame();
         client.printBoard();
+
+        while (!client.isGameOver) {
+            Coordinate nextMoveOfA = client.getPlayerNextMove();
+            client.registerAttack('A', nextMoveOfA);
+            Coordinate nextMoveOfB = client.getComputerNextMove();
+            client.registerAttack('B', nextMoveOfB);
+        }
+
+    }
+
+    public Coordinate getComputerNextMove() {
+        Random rn = new Random();
+        int x = rn.nextInt(9);
+        int y = rn.nextInt(9);
+
+        System.out.println(String.format(
+                "Computer chose to attack coordinate (%s, %s)",
+                x,
+                y
+        ));
+
+        Coordinate attackCoordinate = new Coordinate(x, y);
+        return attackCoordinate;
+    }
+
+    public void registerAttack(char player, Coordinate coordinate) {
+        Ship ship = coordinateToShip.get(coordinate);
+
+        if (ship == null) {
+            System.out.println(String.format("Unfortunately, %s miss the attack!", player));
+        } else {
+            if (ship.getPlayer() == player) {
+                System.out.println("CAREFUL!!! This is your own ship!");
+            } else {
+                if (isAttackAtRightSpot(coordinate)) {
+                    System.out.println(String.format("Congrats! %s's attack is successful!", player));
+                    // do something
+                } else {
+                    System.out.println("Very close! But this part of enemy ship is already wounded!");
+                }
+            }
+        }
+    }
+
+    public boolean isAttackAtRightSpot(Coordinate coordinate) {
+        Ship ship = coordinateToShip.get(coordinate);
+        Map<Coordinate, Boolean> coordinateToStatus = ship.getCoordinateToStatus();
+        boolean status = coordinateToStatus.get(coordinate);
+
+        if (status == true) {
+            coordinateToStatus.put(coordinate, false);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public int getAxisInput(char axis) {
+        Scanner scanner = new Scanner(System.in);
+        boolean isInputValid = false;
+        int parseInteger = 0;
+
+        while (!isInputValid) {
+            String x = scanner.nextLine();
+
+            try {
+                parseInteger = Integer.parseInt(x);
+            } catch (NumberFormatException e) {
+                System.out.println("Please input an input between 0 and 9");
+                System.out.print(String.format("Please enter the %s coordinate: ", axis));
+                continue;
+            }
+
+            if (parseInteger >= 0 && parseInteger <= 9) {
+                isInputValid = true;
+            } else {
+                System.out.println("Please input an input between 0 and 9");
+                System.out.print(String.format("Please enter the %s coordinate: ", axis));
+            }
+        }
+
+        return parseInteger;
+    }
+
+    public Coordinate getPlayerNextMove() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Please enter the X coordinate: ");
+        int x = getAxisInput('X');
+
+        System.out.print("Please enter the Y coordinate: ");
+        int y = getAxisInput('Y');
+
+        System.out.println(String.format(
+                "You chose to attack coordinate (%d, %d)",
+                x,
+                y
+        ));
+
+        return new Coordinate(x, y);
     }
 
     public void startGame() {
-        boolean isAnswerValid = false;
+        Scanner scanner = new Scanner(System.in);
+        boolean isInputValid = false;
 
-        while (!isAnswerValid) {
-            Scanner scanner = new Scanner(System.in);
+        while (!isInputValid) {
+
             String answer = scanner.nextLine();
 
             if (answer.toUpperCase().equals("Y")) {
-                isAnswerValid = true;
-                System.out.println("Game Starts!");
+                isInputValid = true;
                 System.out.println();
+                System.out.println("============Game Starts============");
                 initializeGame();
             } else if (answer.toUpperCase().equals("N")){
-                isAnswerValid = true;
+                isInputValid = true;
                 System.out.println("See You Next Time!");
             } else {
-                System.out.println("Please input a valid answer!");
+                System.out.println("Please answer Y or N!");
             }
         }
     }
@@ -221,6 +323,7 @@ public class BattleshipClient {
     }
 
     public void printBoard() {
+        System.out.println();
         System.out.print("  ");
 
         for (int i = 0; i < board.length; i++) {
@@ -247,5 +350,7 @@ public class BattleshipClient {
 
             System.out.println();
         }
+
+        System.out.println();
     }
 }

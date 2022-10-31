@@ -7,4 +7,14 @@ public class Destroyer extends Ship {
     public Destroyer(ShipBuilders.DestroyerBuilder builder) {
         super(builder);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

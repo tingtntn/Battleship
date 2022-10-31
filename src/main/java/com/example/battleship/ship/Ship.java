@@ -4,6 +4,7 @@ import com.example.battleship.Coordinate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class Ship {
    private int length;
@@ -69,4 +70,33 @@ public abstract class Ship {
    public void setLives(int lives) {
       this.lives = lives;
    }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Ship ship = (Ship) o;
+      System.out.println(length == ship.length);
+      System.out.println("hellohellhoehoeoheoho");
+      return length == ship.length && player == ship.player && type == ship.type && Objects.equals(positions, ship.positions);
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(length, type, player, positions);
+   }
+
+   @Override
+   public String toString() {
+      return "Ship{" +
+              "length=" + length +
+              ", type=" + type +
+              ", player=" + player +
+              ", positions=" + positions +
+              ", coordinateToStatus=" + coordinateToStatus +
+              ", lives=" + lives +
+              '}';
+   }
+
+
 }

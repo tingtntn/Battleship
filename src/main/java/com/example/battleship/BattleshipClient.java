@@ -5,29 +5,74 @@ import com.example.battleship.ship.*;
 import java.util.*;
 
 public class BattleshipClient {
-    Map<Coordinate, Ship> coordinateToShip = new HashMap<>();
+    Map<Coordinate, Ship> coordinateToShip;
+    Map<Character, Player> characterToPlayer;
     char[][] board = new char[10][10];
-    boolean isGameOver = false;
+    boolean isGameOver;
+    boolean wantToPlay;
 
-    public static void main(String args[]) {
-        BattleshipClient client = new BattleshipClient();
-        client.printGameOpening();
-        client.startGame();
-        client.printBoard();
-
-        while (!client.isGameOver) {
-            Coordinate nextMoveOfA = client.getPlayerNextMove();
-            client.registerAttack('A', nextMoveOfA);
-            Coordinate nextMoveOfB = client.getComputerNextMove();
-            client.registerAttack('B', nextMoveOfB);
-        }
-
+    public BattleshipClient() {
+        coordinateToShip = new HashMap<>();
+        characterToPlayer = new HashMap<>();
     }
 
-    public Coordinate getComputerNextMove() {
+    public static void main(String[] args) throws InterruptedException {
+        BattleshipClient client = new BattleshipClient();
+        client.printGameOpening();
+        client.inquireToPlay();
+
+        while (client.wantToPlay) {
+            client.printBoard();
+            client.startGame();
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        scanner.close();
+    }
+
+    public void startGame() throws InterruptedException {
+        isGameOver = false;
+
+        while (!isGameOver) {
+            Coordinate nextMoveOfA = getPlayerNextMove('A');
+            registerAttack('A', nextMoveOfA);
+            printBoard();
+            checkGameStatus();
+
+            if (isGameOver) {
+                break;
+            }
+
+            Coordinate nextMoveOfB = getComputerNextMove();
+            registerAttack('B', nextMoveOfB);
+            printBoard();
+            checkGameStatus();
+        }
+    }
+
+    public void checkGameStatus() {
+        if (characterToPlayer.get('A').getShips().size() == 0) {
+            isGameOver = true;
+            System.out.println("Player B wins the game!");
+        } else if (characterToPlayer.get('B').getShips().size() == 0) {
+            isGameOver = true;
+            System.out.println("Player A wins the game!");
+        }
+
+        if (isGameOver) {
+            Scanner scanner = new Scanner(System.in);
+            inquireToPlay();
+        }
+    }
+
+    public Coordinate getComputerNextMove() throws InterruptedException {
         Random rn = new Random();
         int x = rn.nextInt(9);
         int y = rn.nextInt(9);
+
+        System.out.println("It is B's turn!");
+        System.out.println("Player B is thinking... Please wait");
+        Thread.currentThread().sleep(2000);
 
         System.out.println(String.format(
                 "Computer chose to attack coordinate (%s, %s)",
@@ -50,11 +95,42 @@ public class BattleshipClient {
             } else {
                 if (isAttackAtRightSpot(coordinate)) {
                     System.out.println(String.format("Congrats! %s's attack is successful!", player));
+                    ship.setLives(ship.getLives() - 1);
+
+                    if (ship.getLives() == 0) {
+                        System.out.println(String.format("%s destroys enemy's ship!", player));
+                        updateMapWithShipSink(ship);
+                        updateBoardWithShipSink(ship);
+                        updatePlayerShipsWithShipSink(player, ship);
+                    }
                     // do something
                 } else {
-                    System.out.println("Very close! But this part of enemy ship is already wounded!");
+                    System.out.println("Very close! This part of enemy ship is already wounded!");
                 }
             }
+        }
+    }
+
+    public void updatePlayerShipsWithShipSink(char player, Ship ship) {
+        char enemy = player == 'A' ? 'B' : 'A';
+
+        Set<Ship> ships = characterToPlayer.get(enemy).getShips();
+        ships.remove(ship);
+    }
+
+    public void updateMapWithShipSink(Ship ship) {
+        List<Coordinate> positions = ship.getPositions();
+
+        for (Coordinate coordinate : positions) {
+            coordinateToShip.remove(coordinate);
+        }
+    }
+
+    public void updateBoardWithShipSink(Ship ship) {
+        List<Coordinate> positions = ship.getPositions();
+
+        for (Coordinate coordinate : positions) {
+            board[coordinate.getRow()][coordinate.getCol()] = '.';
         }
     }
 
@@ -63,7 +139,7 @@ public class BattleshipClient {
         Map<Coordinate, Boolean> coordinateToStatus = ship.getCoordinateToStatus();
         boolean status = coordinateToStatus.get(coordinate);
 
-        if (status == true) {
+        if (status) {
             coordinateToStatus.put(coordinate, false);
             return true;
         } else {
@@ -95,11 +171,12 @@ public class BattleshipClient {
             }
         }
 
+//        scanner.close();
         return parseInteger;
     }
 
-    public Coordinate getPlayerNextMove() {
-        Scanner scanner = new Scanner(System.in);
+    public Coordinate getPlayerNextMove(char player) {
+        System.out.println(String.format("It is %s's turn!", player));
 
         System.out.print("Please enter the X coordinate: ");
         int x = getAxisInput('X');
@@ -116,32 +193,47 @@ public class BattleshipClient {
         return new Coordinate(x, y);
     }
 
-    public void startGame() {
+    public void inquireToPlay() {
         Scanner scanner = new Scanner(System.in);
         boolean isInputValid = false;
+
+        System.out.println("Are you ready to play a new game? (Y/N)");
 
         while (!isInputValid) {
 
             String answer = scanner.nextLine();
 
-            if (answer.toUpperCase().equals("Y")) {
+            if (answer.equalsIgnoreCase("Y")) {
                 isInputValid = true;
                 System.out.println();
                 System.out.println("============Game Starts============");
+                wantToPlay = true;
                 initializeGame();
-            } else if (answer.toUpperCase().equals("N")){
+            } else if (answer.equalsIgnoreCase("N")){
                 isInputValid = true;
+                wantToPlay = false;
                 System.out.println("See You Next Time!");
+                return;
             } else {
                 System.out.println("Please answer Y or N!");
             }
         }
+
+//        scanner.close();
     }
 
     public void initializeGame() {
+        initializePlayer();
         initializeShipsForPlayerA();
         initializeShipsForPlayerB();
         initializeBoard();
+    }
+
+    public void initializePlayer() {
+        Player A = new Player();
+        Player B = new Player();
+        characterToPlayer.put('A', A);
+        characterToPlayer.put('B', B);
     }
 
     public void initializeShipsForPlayerA() {
@@ -231,8 +323,8 @@ public class BattleshipClient {
     public void addDestroyer(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
-        for (Coordinate curr : positions) {
-            coordinateToStatus.put(curr, true);
+        for (Coordinate coordinate : positions) {
+            coordinateToStatus.put(coordinate, true);
         }
 
         Destroyer destroyer = ShipBuilders.newDestroyer()
@@ -244,16 +336,18 @@ public class BattleshipClient {
                 .setCoordinateToStatus(coordinateToStatus)
                 .build();
 
-        for (Coordinate curr : positions) {
-            coordinateToShip.put(curr, destroyer);
+        for (Coordinate coordinate : positions) {
+            coordinateToShip.put(coordinate, destroyer);
         }
+
+        characterToPlayer.get(player).getShips().add(destroyer);
     }
 
     public void addSubmarine(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
-        for (Coordinate curr : positions) {
-            coordinateToStatus.put(curr, true);
+        for (Coordinate coordinate : positions) {
+            coordinateToStatus.put(coordinate, true);
         }
 
         Submarine submarine = ShipBuilders.newSubmarine()
@@ -265,16 +359,18 @@ public class BattleshipClient {
                 .setCoordinateToStatus(coordinateToStatus)
                 .build();
 
-        for (Coordinate curr : positions) {
-            coordinateToShip.put(curr, submarine);
+        for (Coordinate coordinate : positions) {
+            coordinateToShip.put(coordinate, submarine);
         }
+
+        characterToPlayer.get(player).getShips().add(submarine);
     }
 
     public void addBattleship(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
-        for (Coordinate curr : positions) {
-            coordinateToStatus.put(curr, true);
+        for (Coordinate coordinate : positions) {
+            coordinateToStatus.put(coordinate, true);
         }
 
         Battleship battleship = ShipBuilders.newBattleship()
@@ -286,16 +382,18 @@ public class BattleshipClient {
                 .setCoordinateToStatus(coordinateToStatus)
                 .build();
 
-        for (Coordinate curr : positions) {
-            coordinateToShip.put(curr, battleship);
+        for (Coordinate coordinate : positions) {
+            coordinateToShip.put(coordinate, battleship);
         }
+
+        characterToPlayer.get(player).getShips().add(battleship);
     }
 
     public void addCarrier(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
-        for (Coordinate curr : positions) {
-            coordinateToStatus.put(curr, true);
+        for (Coordinate coordinate : positions) {
+            coordinateToStatus.put(coordinate, true);
         }
 
         Carrier carrier = ShipBuilders.newCarrier()
@@ -307,9 +405,11 @@ public class BattleshipClient {
                 .setCoordinateToStatus(coordinateToStatus)
                 .build();
 
-        for (Coordinate curr : positions) {
-            coordinateToShip.put(curr, carrier);
+        for (Coordinate coordinate : positions) {
+            coordinateToShip.put(coordinate, carrier);
         }
+
+        characterToPlayer.get(player).getShips().add(carrier);
     }
 
     public void printGameOpening() {
@@ -319,7 +419,6 @@ public class BattleshipClient {
         System.out.println();
         System.out.println("===================================");
         System.out.println("");
-        System.out.println("Are you ready to play a game? (Y/N)");
     }
 
     public void printBoard() {
@@ -352,5 +451,13 @@ public class BattleshipClient {
         }
 
         System.out.println();
+    }
+
+    public void printPlayerShips(char player) {
+        Set<Ship> ships = characterToPlayer.get(player).getShips();
+
+        for (Ship ship : ships) {
+            System.out.println(ship);
+        }
     }
 }

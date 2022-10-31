@@ -1,0 +1,1 @@
+1. Assume player cannot attack its own ship.

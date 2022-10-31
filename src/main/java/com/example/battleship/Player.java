@@ -4,6 +4,10 @@ import com.example.battleship.ship.Ship;
 
 import java.util.*;
 
+/**
+ * An object that denotes an individual player.
+ * Player has Information including how many ships he/she has left.
+ */
 public class Player {
     private Set<Ship> ships;
 

@@ -5,6 +5,11 @@ import com.example.battleship.Coordinate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An interface describes what functions a specific Ship builder class should have.
+ * @param <SELF> specific type of ship builder
+ * @param <TTarget> specific type of ship
+ */
 public interface ShipBuilder<SELF extends ShipBuilder<SELF, TTarget>,
         TTarget extends Ship> {
 

@@ -2,6 +2,9 @@ package com.example.battleship;
 
 import java.util.Objects;
 
+/**
+ * An object that denotes the coordinates of the board.
+ */
 public class Coordinate {
     private int row;
     private int col;

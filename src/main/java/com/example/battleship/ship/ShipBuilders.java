@@ -4,45 +4,47 @@ import com.example.battleship.Coordinate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A builder manager that manages all the specific ship builder classes.
+ */
 public class ShipBuilders {
 
-    public static BattleshipBuilder newBattleship() {
-        return new BattleshipBuilder();
-    }
-
-    public static CarrierBuilder newCarrier() {
-        return new CarrierBuilder();
-    }
-
-    public static SubmarineBuilder newSubmarine() {
-        return new SubmarineBuilder();
-    }
-
+    /**
+     *
+     * @return a builder for Destroyer
+     */
     public static DestroyerBuilder newDestroyer() {
         return new DestroyerBuilder();
     }
 
-    public static class BattleshipBuilder extends AbstractShipBuilder<BattleshipBuilder, Battleship> {
-        @Override
-        protected Battleship internalBuild() {
-            return new Battleship(this);
-        }
+    /**
+     *
+     * @return a builder for Submarine
+     */
+    public static SubmarineBuilder newSubmarine() {
+        return new SubmarineBuilder();
     }
 
-    public static class CarrierBuilder extends AbstractShipBuilder<CarrierBuilder, Carrier> {
-        @Override
-        protected Carrier internalBuild() {
-            return new Carrier(this);
-        }
+    /**
+     *
+     * @return a builder for Battleship
+     */
+    public static BattleshipBuilder newBattleship() {
+        return new BattleshipBuilder();
     }
 
-    public static class SubmarineBuilder extends AbstractShipBuilder<SubmarineBuilder, Submarine> {
-        @Override
-        protected Submarine internalBuild() {
-            return new Submarine(this);
-        }
+    /**
+     *
+     * @return a builder for Carrier
+     */
+    public static CarrierBuilder newCarrier() {
+        return new CarrierBuilder();
     }
 
+    /**
+     * A builder that overrides the internalBuild for Destroyer.
+     * With further development, it can have its own actions, which is specific to Destroyer.
+     */
     public static class DestroyerBuilder extends AbstractShipBuilder<DestroyerBuilder, Destroyer> {
         @Override
         protected Destroyer internalBuild() {
@@ -50,6 +52,49 @@ public class ShipBuilders {
         }
     }
 
+    /**
+     * A builder that overrides the internalBuild for Submarine.
+     * With further development, it can have its own actions, which is specific to Submarine.
+     */
+    public static class SubmarineBuilder extends AbstractShipBuilder<SubmarineBuilder, Submarine> {
+        @Override
+        protected Submarine internalBuild() {
+            return new Submarine(this);
+        }
+    }
+
+    /**
+     * A builder that overrides the internalBuild for Battleship.
+     * With further development, it can have its own actions, which is specific to Battleship.
+     */
+    public static class BattleshipBuilder extends AbstractShipBuilder<BattleshipBuilder, Battleship> {
+        @Override
+        protected Battleship internalBuild() {
+            return new Battleship(this);
+        }
+    }
+
+    /**
+     * A builder that overrides the internalBuild for Carrier.
+     * With further development, it can have its own actions, which is specific to Carrier.
+     */
+    public static class CarrierBuilder extends AbstractShipBuilder<CarrierBuilder, Carrier> {
+        @Override
+        protected Carrier internalBuild() {
+            return new Carrier(this);
+        }
+    }
+
+    /**
+     * Abstract class for specific builder class. It defines basic attributes a ships should have.
+     * @param <SELF> specific type of ship builder
+     * @param <TTarget> specific type of ship
+     *
+     * @see DestroyerBuilder
+     * @see SubmarineBuilder
+     * @see BattleshipBuilder
+     * @see CarrierBuilder
+     */
     abstract static class AbstractShipBuilder<SELF extends ShipBuilder<SELF, TTarget>,
             TTarget extends Ship> implements ShipBuilder<SELF, TTarget> {
 
@@ -126,13 +171,25 @@ public class ShipBuilders {
             return this.coordinateToStatus;
         }
 
+        /**
+         * Builds a specific type of ship.
+         * @return a specific type of ship
+         */
         @Override
         public TTarget build() {
             return internalBuild();
         }
 
+        /**
+         * Builds a specific type of ship. Needed to override in a specific builder class.
+         * @return a specific type of ship
+         */
         protected abstract TTarget internalBuild();
 
+        /**
+         *
+         * @return a specific builder class
+         */
         private SELF self() {
             return (SELF) this;
         }

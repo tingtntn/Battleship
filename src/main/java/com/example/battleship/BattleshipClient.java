@@ -4,16 +4,22 @@ import com.example.battleship.ship.*;
 
 import java.util.*;
 
+/**
+ * The main class to run the application, where the main method locates.
+ * Functions include start a new game, get computer's next move, initialize game, update game
+ * status after each move, add ships, and so on.
+*/
 public class BattleshipClient {
     Map<Coordinate, Ship> coordinateToShip;
     Map<Character, Player> characterToPlayer;
-    char[][] board = new char[10][10];
+    char[][] board;
     boolean isGameOver;
     boolean wantToPlay;
 
     public BattleshipClient() {
         coordinateToShip = new HashMap<>();
         characterToPlayer = new HashMap<>();
+        board = new char[10][10];
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -30,6 +36,10 @@ public class BattleshipClient {
         scanner.close();
     }
 
+    /** Starts a new game after a player hits Yes
+     *
+     * @throws InterruptedException
+     */
     public void startGame() throws InterruptedException {
         isGameOver = false;
 
@@ -50,6 +60,9 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Checks whether the game is over after a player makes a move.
+     */
     public void checkGameStatus() {
         if (characterToPlayer.get('A').getShips().size() == 0) {
             isGameOver = true;
@@ -65,6 +78,11 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Returns a random move from computer.
+     * @return coordinate the computer chooses to move
+     * @throws InterruptedException
+     */
     public Coordinate getComputerNextMove() throws InterruptedException {
         Random rn = new Random();
         int x = rn.nextInt(9);
@@ -75,7 +93,7 @@ public class BattleshipClient {
         Thread.currentThread().sleep(2000);
 
         System.out.println(String.format(
-                "Computer chose to attack coordinate (%s, %s)",
+                "Computer chooses to attack coordinate (%s, %s)",
                 x,
                 y
         ));
@@ -84,6 +102,12 @@ public class BattleshipClient {
         return attackCoordinate;
     }
 
+    /** Registers the attack after a player chooses where to attack. It shows indication whether a player
+     * hits a ship or not. Additionally, it updates the ship status after it is sunk.
+     *
+     * @param player the character represents the player (for example, a, b...)
+     * @param coordinate the coordinate a player chooses to attack
+     */
     public void registerAttack(char player, Coordinate coordinate) {
         Ship ship = coordinateToShip.get(coordinate);
 
@@ -111,6 +135,11 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Updates player's ship set after a ship is sunk.
+     * @param player the character represents the player (for example, a, b...)
+     * @param ship the ship that is sunk
+     */
     public void updatePlayerShipsWithShipSink(char player, Ship ship) {
         char enemy = player == 'A' ? 'B' : 'A';
 
@@ -118,6 +147,10 @@ public class BattleshipClient {
         ships.remove(ship);
     }
 
+    /**
+     * Updates the map (helper variable to see whose ship a specific coordinate has) after a ship is sunk.
+     * @param ship the ship that is sunk
+     */
     public void updateMapWithShipSink(Ship ship) {
         List<Coordinate> positions = ship.getPositions();
 
@@ -126,6 +159,10 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Updates the board after a ship is sunk.
+     * @param ship the ship that is sunk
+     */
     public void updateBoardWithShipSink(Ship ship) {
         List<Coordinate> positions = ship.getPositions();
 
@@ -134,6 +171,12 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Checks whether the attack is really effective.
+     * It is possible that a player attacks the same part of enemy's one ship multiple times.
+     * @param coordinate the coordinate a player chooses to attack
+     * @return true if the part of ship is not damaged. Otherwise, false.
+     */
     public boolean isAttackAtRightSpot(Coordinate coordinate) {
         Ship ship = coordinateToShip.get(coordinate);
         Map<Coordinate, Boolean> coordinateToStatus = ship.getCoordinateToStatus();
@@ -147,6 +190,11 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Gets input value for a coordinate from a player.
+     * @param axis
+     * @return value entered by the player
+     */
     public int getAxisInput(char axis) {
         Scanner scanner = new Scanner(System.in);
         boolean isInputValid = false;
@@ -175,6 +223,11 @@ public class BattleshipClient {
         return parseInteger;
     }
 
+    /**
+     * Gets the coordinate a player chooses to attack.
+     * @param player the character represents the player (for example, a, b...)
+     * @return the coordinate the player chooses to attack
+     */
     public Coordinate getPlayerNextMove(char player) {
         System.out.println(String.format("It is %s's turn!", player));
 
@@ -185,7 +238,7 @@ public class BattleshipClient {
         int y = getAxisInput('Y');
 
         System.out.println(String.format(
-                "You chose to attack coordinate (%d, %d)",
+                "You choose to attack coordinate (%d, %d)",
                 x,
                 y
         ));
@@ -193,6 +246,9 @@ public class BattleshipClient {
         return new Coordinate(x, y);
     }
 
+    /**
+     * Inquires player whether he/she wants to play a game.
+     */
     public void inquireToPlay() {
         Scanner scanner = new Scanner(System.in);
         boolean isInputValid = false;
@@ -222,6 +278,9 @@ public class BattleshipClient {
 //        scanner.close();
     }
 
+    /**
+     * Initializes the whole game, including the players, ships, and board.
+     */
     public void initializeGame() {
         initializePlayer();
         initializeShipsForPlayerA();
@@ -229,6 +288,9 @@ public class BattleshipClient {
         initializeBoard();
     }
 
+    /**
+     * Initializes the players.
+     */
     public void initializePlayer() {
         Player A = new Player();
         Player B = new Player();
@@ -236,6 +298,9 @@ public class BattleshipClient {
         characterToPlayer.put('B', B);
     }
 
+    /**
+     * Initializes the ships and coordinates for player A.
+     */
     public void initializeShipsForPlayerA() {
         addDestroyer('A', new ArrayList<>(
                 Arrays.asList(
@@ -272,6 +337,9 @@ public class BattleshipClient {
         ));
     }
 
+    /**
+     * Initializes the ships and coordinates for player B.
+     */
     public void initializeShipsForPlayerB() {
         addDestroyer('B', new ArrayList<>(
                 Arrays.asList(
@@ -308,6 +376,9 @@ public class BattleshipClient {
         ));
     }
 
+    /**
+     * Initializes the board (visual presentation of the game).
+     */
     public void initializeBoard() {
         for (char[] row : board) {
             Arrays.fill(row, '.');
@@ -320,6 +391,12 @@ public class BattleshipClient {
         }
     }
 
+    /**
+     * Adds a Destroyer ship onto the board for a specific player with a set of coordinates
+     * where it is located at.
+     * @param player the character represents the player (for example, a, b...)
+     * @param positions the coordinates the destroyer is located at
+     */
     public void addDestroyer(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
@@ -343,6 +420,12 @@ public class BattleshipClient {
         characterToPlayer.get(player).getShips().add(destroyer);
     }
 
+    /**
+     * Adds a Submarine ship onto the board for a specific player with a set of coordinates
+     * where it is located at.
+     * @param player the character represents the player (for example, a, b...)
+     * @param positions the coordinates the destroyer is located at
+     */
     public void addSubmarine(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
@@ -366,6 +449,12 @@ public class BattleshipClient {
         characterToPlayer.get(player).getShips().add(submarine);
     }
 
+    /**
+     * Adds a Battleship ship onto the board for a specific player with a set of coordinates
+     * where it is located at.
+     * @param player the character represents the player (for example, a, b...)
+     * @param positions the coordinates the destroyer is located at
+     */
     public void addBattleship(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
@@ -389,6 +478,12 @@ public class BattleshipClient {
         characterToPlayer.get(player).getShips().add(battleship);
     }
 
+    /**
+     * Adds a Carrier ship onto the board for a specific player with a set of coordinates
+     * where it is located at.
+     * @param player the character represents the player (for example, a, b...)
+     * @param positions the coordinates the destroyer is located at
+     */
     public void addCarrier(char player, List<Coordinate> positions) {
         Map<Coordinate, Boolean> coordinateToStatus = new HashMap<>();
 
@@ -412,6 +507,9 @@ public class BattleshipClient {
         characterToPlayer.get(player).getShips().add(carrier);
     }
 
+    /**
+     * Prints the game opening when a player opens the game.
+     */
     public void printGameOpening() {
         System.out.println("===================================");
         System.out.println();
@@ -421,6 +519,9 @@ public class BattleshipClient {
         System.out.println("");
     }
 
+    /**
+     * Prints and visualizes how the game look like currently.
+     */
     public void printBoard() {
         System.out.println();
         System.out.print("  ");
@@ -453,6 +554,10 @@ public class BattleshipClient {
         System.out.println();
     }
 
+    /**
+     * Prints the ships set a player has.
+     * @param player the character represents the player (for example, a, b...)
+     */
     public void printPlayerShips(char player) {
         Set<Ship> ships = characterToPlayer.get(player).getShips();
 

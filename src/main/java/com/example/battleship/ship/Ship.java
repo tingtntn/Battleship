@@ -6,6 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A ship object. It is the parent class of specific types of ship (Destroyer, Submarine...)
+ * It has information including the length, type, player, lives, positions, and so on.
+ *
+ *
+ * @see Destroyer
+ * @see Submarine
+ * @see Battleship
+ * @see Carrier
+ */
 public abstract class Ship {
    private int length;
    private ShipType type;
@@ -76,8 +86,6 @@ public abstract class Ship {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Ship ship = (Ship) o;
-      System.out.println(length == ship.length);
-      System.out.println("hellohellhoehoeoheoho");
       return length == ship.length && player == ship.player && type == ship.type && Objects.equals(positions, ship.positions);
    }
 
@@ -97,6 +105,4 @@ public abstract class Ship {
               ", lives=" + lives +
               '}';
    }
-
-
 }
